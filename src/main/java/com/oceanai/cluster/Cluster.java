@@ -1,7 +1,7 @@
 package com.oceanai.cluster;
 
-import org.opencv.core.Mat;
-import org.opencv.imgcodecs.Imgcodecs;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * .
@@ -11,11 +11,22 @@ import org.opencv.imgcodecs.Imgcodecs;
  */
 public class Cluster {
 
-  static {
-    System.load("D:\\users\\xiongraorao\\IdeaProjects\\cluster\\src\\opencv_java320.dll");
+  private List<DataPoint> dataPoints = new ArrayList<>(); // 类簇中的样本点
+  private String clusterName;
+
+  public List<DataPoint> getDataPoints() {
+    return dataPoints;
   }
 
-  public static void main(String[] args) {
-    Mat src = Imgcodecs.imread("F:\\sunset.jpg");
+  public void setDataPoints(List<DataPoint> dataPoints) {
+    this.dataPoints = dataPoints;
+  }
+
+  public String getClusterName() {
+    return clusterName;
+  }
+
+  public void setClusterName(String clusterName) {
+    this.clusterName = clusterName;
   }
 }

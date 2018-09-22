@@ -1,12 +1,15 @@
 package com.oceanai.util;
 
+import com.oceanai.cluster.Cluster;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import org.opencv.core.Mat;
-import org.opencv.features2d.FlannBasedMatcher;
 
 /**
  * java显示图片.
@@ -21,11 +24,13 @@ public class CVTool {
 
   }
 
-  public static void flann(double[][] dataset, int n) {
-    FlannBasedMatcher matcher = new FlannBasedMatcher();
-    //matcher.match();
+  public static void showCluster(Cluster cluster) throws IOException {
+    String title = cluster.getClusterName();
+    String imageFile = cluster.getClusterName();
+    BufferedImage image = ImageIO.read(new File(imageFile));
+    JFrame frame = new JFrame(title);
+    frame.setBounds(0,0, 1000, 1000);
   }
-
 
   public static void showImage(Mat mat, String windowsName) {
     BufferedImage image = toBufferedImage(mat);
