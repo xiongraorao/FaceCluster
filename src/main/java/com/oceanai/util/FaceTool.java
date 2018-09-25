@@ -70,6 +70,15 @@ public class FaceTool {
     return detect(base64, 80);
   }
 
+  public List<SearchFeature> detect(BufferedImage bufferedImage, String encoding) {
+    String base64 = ImageUtil.bufferedImageToBase64(bufferedImage, encoding);
+    return detect(base64);
+  }
+
+  public List<SearchFeature> detect(BufferedImage bufferedImage, String encoding, int minFace) {
+    String base64 = ImageUtil.bufferedImageToBase64(bufferedImage, encoding);
+    return detect(base64, minFace);
+  }
 
   public List<SearchFeature> detect(String base64, int minFace) {
     if (!isConnected) {
@@ -77,24 +86,23 @@ public class FaceTool {
       throw new RuntimeException("ZeroMQ is not connect ...");
     }
     boolean sendResult = send(base64, minFace);
+    List<SearchFeature> searchFeatures = new ArrayList<>();
     if (sendResult) {
       String result = receiveResult();
 
       DetectResult detectResult = gson.fromJson(result, DetectResult.class);
-      List<SearchFeature> searchFeatures = new ArrayList<>(detectResult.getDetect_nums());
       for (int i = 0; i < detectResult.getDetect_nums(); ++i) {
         FaceFeature faceFeature = detectResult.getResult()[i];
         int x1 = faceFeature.getLeft();
         int y1 = faceFeature.getTop();
-        int x2 = x1 + faceFeature.getWidth();
-        int y2 = y1 + faceFeature.getHeight();
         searchFeatures.add(
-            new SearchFeature(x1, y1, x2, y2, faceFeature.getScore(), faceFeature.getGlasses(),
-                faceFeature.getQuality(), faceFeature.getSideFace(), faceFeature.getLandmark()));
+            new SearchFeature(x1, y1, faceFeature.getWidth(), faceFeature.getHeight(),
+                faceFeature.getScore(), faceFeature.getGlasses(), faceFeature.getQuality(),
+                faceFeature.getSideFace(), faceFeature.getLandmark()));
       }
       return searchFeatures;
     } else {
-      return null;
+      return searchFeatures;
     }
   }
 

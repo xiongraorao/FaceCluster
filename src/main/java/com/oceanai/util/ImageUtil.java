@@ -61,6 +61,17 @@ public class ImageUtil {
     return bytesToImage(bys);
   }
 
+  public static String bufferedImageToBase64(BufferedImage bufferedImage, String encoding) {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      ImageIO.write(bufferedImage, encoding, baos);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    Encoder encoder = Base64.getEncoder();
+    return encoder.encodeToString(baos.toByteArray());
+  }
+
   /**
    * Converts an image to byte buffer representing PNG (bytes as they would exist on disk)
    *

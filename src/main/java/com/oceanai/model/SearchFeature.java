@@ -16,11 +16,11 @@ public class SearchFeature {
     score = arr[4];
   }
 
-  public SearchFeature(int x1, int y1, int x2, int y2, double score, double glasses, double quality,
-      double sideFace, LandMark landMark) {
-    bbox = new BBox(x1, y1, x2, y2);
-    this.width = Math.abs(x2 - x1);
-    this.height = Math.abs(y2 - y1);
+  public SearchFeature(int x1, int y1, int width, int height, double score, double glasses,
+      double quality, double sideFace, LandMark landMark) {
+    bbox = new BBox(x1, y1, x1 + width, y1 + height);
+    this.width = width;
+    this.height = height;
     this.score = score;
     this.quality = quality;
     this.glasses = glasses;
