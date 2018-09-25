@@ -42,12 +42,15 @@ public class VideoGrab {
             BufferedImage sub = bufferedImage
                 .getSubimage(leftTop.x, leftTop.y, feature.width, feature.height);
             String path = "F:\\secretstar\\" + String.format("%010d", count++) + ".jpg";
-            ImageIO.write(sub, "jpg", new File(path));
+            if (feature.quality == 1.0) {
+              ImageIO.write(sub, "jpg", new File(path));
+            }
             logger.info("save to " + path + "successfully!");
           }
         }
       } catch (InterruptedException | IOException e) {
         e.printStackTrace();
+        break;
       }
     }
   }
