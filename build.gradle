@@ -21,7 +21,7 @@ jar {
     manifest {
         attributes 'Implementation-Title': 'Cluster',
                 'Implementation-Version': version
-        attributes "Class-Path": configurations.compile.collect { it.getName() }.join(' dependencies/')
+        attributes "Class-Path": configurations.compile.collect {'dependencies/' + it.getName() }.join(' ')
     }
 }
 
