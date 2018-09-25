@@ -46,15 +46,17 @@ public class FaceCollect {
         if (searchFeatureList.size() != 0) {
           logger.info("start collect face in camera 61");
           for (SearchFeature feature : searchFeatureList) {
-            SearchFeature.Point leftTop = feature.bbox.left_top;
-            BufferedImage sub = bImg61
-                .getSubimage(leftTop.x, leftTop.y, feature.width, feature.height);
-            String path = outputPath + File.separator + "61" + File.separator + UUID
-                .randomUUID().toString() + ".jpg";
             if (feature.quality == 1.0) {
+              SearchFeature.Point leftTop = feature.bbox.left_top;
+              BufferedImage sub = bImg61
+                  .getSubimage(leftTop.x, leftTop.y, feature.width, feature.height);
+              String path = outputPath + File.separator + "61" + File.separator + UUID
+                  .randomUUID().toString() + ".jpg";
               ImageIO.write(sub, "jpg", new File(path));
+              logger.info("save to " + path + "successfully!");
+            }else {
+              logger.info("image quality is poor!");
             }
-            logger.info("save to " + path + "successfully!");
           }
         }
 

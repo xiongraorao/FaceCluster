@@ -38,14 +38,16 @@ public class VideoGrab {
         if (searchFeatureList.size() != 0) {
           logger.info("start collect face in camera 61");
           for (SearchFeature feature : searchFeatureList) {
-            SearchFeature.Point leftTop = feature.bbox.left_top;
-            BufferedImage sub = bufferedImage
-                .getSubimage(leftTop.x, leftTop.y, feature.width, feature.height);
-            String path = "F:\\secretstar\\" + String.format("%010d", count++) + ".jpg";
             if (feature.quality == 1.0) {
+              SearchFeature.Point leftTop = feature.bbox.left_top;
+              BufferedImage sub = bufferedImage
+                  .getSubimage(leftTop.x, leftTop.y, feature.width, feature.height);
+              String path = "F:\\secretstar\\" + String.format("%010d", count++) + ".jpg";
               ImageIO.write(sub, "jpg", new File(path));
+              logger.info("save to " + path + "successfully!");
+            }else {
+              logger.info("image quality is poor!");
             }
-            logger.info("save to " + path + "successfully!");
           }
         }
       } catch (InterruptedException | IOException e) {
