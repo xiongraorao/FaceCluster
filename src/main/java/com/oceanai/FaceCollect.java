@@ -62,7 +62,7 @@ public class FaceCollect {
 
         if (searchFeatureList2.size() != 0) {
           logger.info("start collect face in camera 62");
-          for (SearchFeature feature : searchFeatureList) {
+          for (SearchFeature feature : searchFeatureList2) {
             SearchFeature.Point leftTop = feature.bbox.left_top;
             BufferedImage sub = bImg62
                 .getSubimage(leftTop.x, leftTop.y, feature.width, feature.height);
