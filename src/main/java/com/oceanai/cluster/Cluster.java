@@ -13,6 +13,15 @@ public class Cluster {
 
   private List<DataPoint> dataPoints = new ArrayList<>(); // 类簇中的样本点
   private String clusterName;
+  private DataPoint mid; // 类簇的中心点
+
+  public DataPoint getMid() {
+    return mid;
+  }
+
+  public void setMid(DataPoint mid) {
+    this.mid = mid;
+  }
 
   public List<DataPoint> getDataPoints() {
     return dataPoints;
