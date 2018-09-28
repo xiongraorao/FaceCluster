@@ -37,11 +37,17 @@ public class DirectCluster {
 
   private List<Cluster> startCluster(List<DataPoint> dps, double threshold) {
     List<Cluster> finalCluster = initialCluster(dps);
-    for (int i = 0; i < finalCluster.size(); i++) {
-      for (int j = i + 1; j < finalCluster.size(); j++) {
-        if (getDistance(finalCluster.get(i), finalCluster.get(j)) > threshold) {
-          // j合并到i中
-          finalCluster = mergeCluster(finalCluster, i, j);
+
+    boolean flag = true;
+    while (flag) {
+      flag = false;
+      for (int i = 0; i < finalCluster.size(); i++) {
+        for (int j = i + 1; j < finalCluster.size(); j++) {
+          if (getDistance(finalCluster.get(i), finalCluster.get(j)) > threshold) {
+            // j合并到i中
+            finalCluster = mergeCluster(finalCluster, i, j);
+            flag = true;
+          }
         }
       }
     }
