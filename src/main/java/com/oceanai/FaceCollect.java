@@ -47,7 +47,7 @@ public class FaceCollect {
         if (searchFeatureList.size() != 0) {
           logger.info("start collect face in camera 61");
           for (SearchFeature feature : searchFeatureList) {
-            if (feature.quality == 1.0) {
+            if (feature.quality == 1.0 && feature.score > 0.95) {
               SearchFeature.Point leftTop = feature.bbox.left_top;
               BufferedImage sub = bImg61
                   .getSubimage(leftTop.x, leftTop.y, feature.width, feature.height);
@@ -72,7 +72,7 @@ public class FaceCollect {
             String uuid = UUID.randomUUID().toString();
             String path = outputPath + File.separator + "62" + File.separator + uuid + ".jpg";
             String originPath = outputPath + File.separator + "62" + File.separator + uuid + "-origin" + ".jpg";
-            if (feature.quality == 1.0) {
+            if (feature.quality == 1.0 && feature.score > 0.95) {
               ImageIO.write(sub, "jpg", new File(path));
               ImageIO.write(bImg62, "jpg", new File(originPath));
             }
