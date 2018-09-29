@@ -3,6 +3,7 @@ package com.oceanai;
 import com.oceanai.model.SearchFeature;
 import com.oceanai.util.FaceTool;
 import com.oceanai.util.LogUtil;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class FaceCollect {
     service.execute(new GrabThread(RTSP61, b61));
     service.execute(new GrabThread(RTSP62, b62));
     FaceTool tool = new FaceTool("tcp://192.168.1.6:5559");
-    String outputPath = "F:\\camera";
+    String outputPath = "F:\\camera2";
     logger.info("start face collection");
     while (true) {
       try {
@@ -46,7 +47,7 @@ public class FaceCollect {
         if (searchFeatureList.size() != 0) {
           logger.info("start collect face in camera 61");
           for (SearchFeature feature : searchFeatureList) {
-            if (feature.quality == 1.0) {
+            if (feature.quality == 1.0 && feature.score > 0.95) {
               SearchFeature.Point leftTop = feature.bbox.left_top;
               BufferedImage sub = bImg61
                   .getSubimage(leftTop.x, leftTop.y, feature.width, feature.height);
@@ -68,7 +69,7 @@ public class FaceCollect {
                 .getSubimage(leftTop.x, leftTop.y, feature.width, feature.height);
             String path = outputPath + File.separator + "62" + File.separator + UUID
                 .randomUUID().toString() + ".jpg";
-            if (feature.quality == 1.0) {
+            if (feature.quality == 1.0 && feature.score > 0.95) {
               ImageIO.write(sub, "jpg", new File(path));
             }
             logger.info("save to " + path + "successfully!");
