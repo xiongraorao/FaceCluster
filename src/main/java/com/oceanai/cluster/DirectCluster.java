@@ -18,7 +18,8 @@ public class DirectCluster {
 
   public static void main(String[] args) {
     DirectCluster dc = new DirectCluster();
-    List<DataPoint> dps = dc.readData("C:\\Users\\xiongraorao\\Desktop\\faces.txt");
+    //List<DataPoint> dps = dc.readData("C:\\Users\\xiongraorao\\Desktop\\faces.txt");
+    List<DataPoint> dps = dc.readData("F:\\lfw.txt");
     double threshold = 0.6;// 分类依据，如果相似度大于0.75的为一类
     long start = System.currentTimeMillis();
     List<Cluster> finalCluster = dc.startCluster(dps, threshold);
@@ -158,10 +159,4 @@ public class DirectCluster {
     return ret;
   }
 
-  static class Face {
-
-    String path;
-    double[] feature;
-    String label;
-  }
 }

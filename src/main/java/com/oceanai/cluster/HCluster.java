@@ -232,7 +232,7 @@ public class HCluster {
     return readDataMulti(dir, 10);
   }
 
-  private List<DataPoint> readDataMulti(String dir, int threadNum) {
+  public List<DataPoint> readDataMulti(String dir, int threadNum) {
     List<String> files = getFiles(dir);
     List<DataPoint> res = new ArrayList<>();
     ExecutorService executors = Executors.newFixedThreadPool(threadNum);
