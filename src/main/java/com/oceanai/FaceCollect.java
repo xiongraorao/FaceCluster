@@ -3,6 +3,7 @@ package com.oceanai;
 import com.oceanai.model.SearchFeature;
 import com.oceanai.util.FaceTool;
 import com.oceanai.util.LogUtil;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class FaceCollect {
     service.execute(new GrabThread(RTSP61, b61));
     service.execute(new GrabThread(RTSP62, b62));
     FaceTool tool = new FaceTool("tcp://192.168.1.6:5559");
-    String outputPath = "F:\\camera";
+    String outputPath = "F:\\camera2";
     logger.info("start face collection");
     while (true) {
       try {
@@ -50,9 +51,11 @@ public class FaceCollect {
               SearchFeature.Point leftTop = feature.bbox.left_top;
               BufferedImage sub = bImg61
                   .getSubimage(leftTop.x, leftTop.y, feature.width, feature.height);
-              String path = outputPath + File.separator + "61" + File.separator + UUID
-                  .randomUUID().toString() + ".jpg";
+              String uuid = UUID.randomUUID().toString();
+              String path = outputPath + File.separator + "61" + File.separator + uuid + ".jpg";
+              String originPath = outputPath + File.separator + "61" + File.separator + uuid + "-origin" + ".jpg";
               ImageIO.write(sub, "jpg", new File(path));
+              ImageIO.write(bImg61, "jpg", new File(originPath));
               logger.info("save to " + path + "successfully!");
             }else {
               logger.info("image quality is poor!");
@@ -66,10 +69,12 @@ public class FaceCollect {
             SearchFeature.Point leftTop = feature.bbox.left_top;
             BufferedImage sub = bImg62
                 .getSubimage(leftTop.x, leftTop.y, feature.width, feature.height);
-            String path = outputPath + File.separator + "62" + File.separator + UUID
-                .randomUUID().toString() + ".jpg";
+            String uuid = UUID.randomUUID().toString();
+            String path = outputPath + File.separator + "62" + File.separator + uuid + ".jpg";
+            String originPath = outputPath + File.separator + "62" + File.separator + uuid + "-origin" + ".jpg";
             if (feature.quality == 1.0) {
               ImageIO.write(sub, "jpg", new File(path));
+              ImageIO.write(bImg62, "jpg", new File(originPath));
             }
             logger.info("save to " + path + "successfully!");
           }
