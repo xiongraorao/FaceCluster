@@ -1,4 +1,4 @@
-package com.oceanai.cluster;
+package com.oceanai.cluster.bean;
 
 /**
  * .
@@ -6,7 +6,7 @@ package com.oceanai.cluster;
  * @author Xiong Raorao
  * @since 2018-09-29-17:59
  */
-public class Face {
+public class F {
 
   String path;
   double[] feature;

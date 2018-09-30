@@ -1,6 +1,6 @@
 package com.oceanai.util;
 
-import com.oceanai.cluster.Cluster;
+import com.oceanai.cluster.bean.Cluster;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;

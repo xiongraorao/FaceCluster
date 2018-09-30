@@ -1,8 +1,9 @@
 package com.oceanai.test;
 
 import com.google.gson.Gson;
-import com.oceanai.cluster.DataPoint;
 import com.oceanai.cluster.HCluster;
+import com.oceanai.cluster.bean.DataPoint;
+import com.oceanai.util.ClusterUtil;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
@@ -18,14 +19,14 @@ public class LFWFeature {
   public static void main(String[] args) throws IOException {
     HCluster hc = new HCluster();
     long start = System.currentTimeMillis();
-    List<DataPoint> dps = hc.readDataMulti("F:\\lfw", 20);
+    List<DataPoint> dps = ClusterUtil.extractMulti("F:\\secretstar", "tcp://192.168.1.6:5559", 20);
     int latency = (int) ((System.currentTimeMillis() - start) / 1000);
     System.out.println("process time: " + latency + " s");
-    FileWriter fw = new FileWriter("F:\\lfw.txt");
+    FileWriter fw = new FileWriter("F:\\secretstar.txt");
     Gson gson = new Gson();
     for (DataPoint dp : dps) {
       Face face = new Face();
-      face.feature = dp.getDimensioin();
+      face.feature = dp.getVector();
       face.path = dp.getDataPointName();
       String s = face.path;
       int a = s.lastIndexOf("\\");

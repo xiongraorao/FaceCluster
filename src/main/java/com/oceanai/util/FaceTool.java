@@ -89,16 +89,16 @@ public class FaceTool {
     List<SearchFeature> searchFeatures = new ArrayList<>();
     if (sendResult) {
       String result = receiveResult();
-
+      System.out.println(result);
       DetectResult detectResult = gson.fromJson(result, DetectResult.class);
       for (int i = 0; i < detectResult.getDetect_nums(); ++i) {
         FaceFeature faceFeature = detectResult.getResult()[i];
-        int x1 = faceFeature.getLeft();
-        int y1 = faceFeature.getTop();
+        int left = faceFeature.getLeft();
+        int top = faceFeature.getTop();
         searchFeatures.add(
-            new SearchFeature(x1, y1, faceFeature.getWidth(), faceFeature.getHeight(),
-                faceFeature.getScore(), faceFeature.getGlasses(), faceFeature.getQuality(),
-                faceFeature.getSideFace(), faceFeature.getLandmark()));
+            new SearchFeature(top, left, faceFeature.getWidth(), faceFeature.getHeight(),
+                faceFeature.getScore(), faceFeature.getLandmark(), faceFeature.getGlasses(),
+                faceFeature.getQuality(), faceFeature.getSideFace()));
       }
       return searchFeatures;
     } else {
@@ -172,18 +172,19 @@ public class FaceTool {
       for (int i = 0; i < detectResult.size(); i++) {
         SearchFeature f = detectResult.get(i);
         faces[i] = new Face();
-        faces[i].setImage_base64(getFaceBase64(ImageUtil.base64ToBufferedImage(base64), f.bbox));
+        faces[i].setImage_base64(
+            getFaceBase64(ImageUtil.base64ToBufferedImage(base64), f.top, f.left, f.width,
+                f.height));
         faces[i].setLandMark(f.landMark);
       }
       return extract(faces);
     }
   }
 
-  private String getFaceBase64(BufferedImage bufferedImage, SearchFeature.BBox box)
+  private String getFaceBase64(BufferedImage bufferedImage, int top, int left, int width,
+      int height)
       throws IOException {
-    BufferedImage face = bufferedImage
-        .getSubimage(box.left_top.x, box.left_top.y, box.right_down.x - box.left_top.x,
-            box.right_down.y - box.left_top.y);
+    BufferedImage face = bufferedImage.getSubimage(left, top, width, height);
     byte[] bytes = ImageUtil.imageToBytes(face, "jpg");
     Base64.Encoder encoder = Base64.getEncoder();
     return encoder.encodeToString(bytes);

@@ -1,9 +1,11 @@
 package com.oceanai.cluster;
 
-import com.google.gson.Gson;
-import java.io.BufferedReader;
+import com.oceanai.cluster.bean.Cluster;
+import com.oceanai.cluster.bean.DataPoint;
+import com.oceanai.util.ClusterUtil;
+import com.oceanai.util.DistanceUtil;
+import com.oceanai.util.FileUtil;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,9 @@ public class DirectCluster {
   public static void main(String[] args) {
     DirectCluster dc = new DirectCluster();
     //List<DataPoint> dps = dc.readData("C:\\Users\\xiongraorao\\Desktop\\faces.txt");
-    List<DataPoint> dps = dc.readData("F:\\lfw.txt");
+    //List<DataPoint> dps = dc.readData("F:\\lfw.txt");
+    List<DataPoint> dps = ClusterUtil.readData("F:\\secretstar.txt");
+    String output = "F:\\secretstart-out\\";
     double threshold = 0.6;// 分类依据，如果相似度大于0.75的为一类
     long start = System.currentTimeMillis();
     List<Cluster> finalCluster = dc.startCluster(dps, threshold);
@@ -30,9 +34,23 @@ public class DirectCluster {
     System.out.println("Total Time: " + latency);
     for (Cluster cluster : finalCluster) {
       System.out.println("====cluster: " + cluster.getClusterName() + "==========");
-      List<DataPoint> dataPoints = cluster.getDataPoints();
-      dataPoints.forEach(e -> System.out.println(e.dataPointName));
-      System.out.println("=========================");
+      File f = new File(output + File.separator + cluster.getClusterName());
+      if (f.mkdir()) {
+        List<DataPoint> dataPoints = cluster.getDataPoints();
+        dataPoints.forEach(e -> System.out.println(e.getDataPointName()));
+        dataPoints.forEach(e -> {
+          String srcPath = e.getDataPointName();
+          String fileName = srcPath.substring(srcPath.lastIndexOf("\\") + 1, srcPath.length());
+          try {
+            FileUtil.copy(srcPath,
+                output + File.separator + cluster.getClusterName() + File.separator + fileName);
+          } catch (IOException e1) {
+            e1.printStackTrace();
+          }
+        });
+        System.out.println("=========================");
+      }
+
     }
   }
 
@@ -68,18 +86,18 @@ public class DirectCluster {
       for (DataPoint dp : dpB) {
         DataPoint tempDp = new DataPoint();
         tempDp.setDataPointName(dp.getDataPointName());
-        tempDp.setDimensioin(dp.getDimensioin());
+        tempDp.setVector(dp.getVector());
         tempDp.setCluster(clusterA);
         dpA.add(tempDp);
       }
 
       // 重新计算dpA的中心点
       DataPoint mid = new DataPoint();
-      double[] d = new double[dpA.get(0).getDimensioin().length];
+      double[] d = new double[dpA.get(0).getVector().length];
       for (int i = 0; i < d.length; i++) {
         double t = 0;
         for (int j = 0; j < dpA.size(); j++) {
-          t += dpA.get(j).getDimensioin()[i];
+          t += dpA.get(j).getVector()[i];
         }
         d[i] = t / dpA.size();
       }
@@ -91,7 +109,7 @@ public class DirectCluster {
       for (int i = 0; i < d.length; i++) {
         d[i] = d[i] / sum;
       }
-      mid.setDimensioin(d);
+      mid.setVector(d);
       clusterA.setMid(mid);
       clusterA.setDataPoints(dpA);
       finalClusters.remove(mergeIndexB);
@@ -102,25 +120,7 @@ public class DirectCluster {
   private double getDistance(Cluster c1, Cluster c2) {
     DataPoint d1 = c1.getMid();
     DataPoint d2 = c2.getMid();
-    return getDistance(d1, d2);
-  }
-
-  private double getDistance(DataPoint dataPoint, DataPoint dataPoint2) {
-    double distance = 0;
-    double[] dimA = dataPoint.getDimensioin();
-    double[] dimB = dataPoint2.getDimensioin();
-    if (dimA.length == dimB.length) {
-      double mdimA = 0;// dimA的莫
-      double mdimB = 0;// dimB的莫
-      double proAB = 0;// dimA和dimB的向量积
-      for (int i = 0; i < dimA.length; i++) {
-        proAB = proAB + dimA[i] * dimB[i];
-        mdimA = mdimA + dimA[i] * dimA[i];
-        mdimB = mdimB + dimB[i] * dimB[i];
-      }
-      distance = proAB / (Math.sqrt(mdimA) * Math.sqrt(mdimB));
-    }
-    return distance;
+    return DistanceUtil.cosine(d1, d2);
   }
 
   private List<Cluster> initialCluster(List<DataPoint> dps) {
@@ -137,26 +137,6 @@ public class DirectCluster {
       originalClusters.add(tempCluster);
     }
     return originalClusters;
-  }
-
-
-  private List<DataPoint> readData(String filePath) {
-    File file = new File(filePath);
-    Gson gson = new Gson();
-    List<DataPoint> ret = new ArrayList<>();
-    try {
-      FileReader fr = new FileReader(file);
-      BufferedReader br = new BufferedReader(fr);
-      String line;
-      while ((line = br.readLine()) != null) {
-        Face face = gson.fromJson(line, Face.class);
-        ret.add(new DataPoint(face.feature, face.path));
-      }
-      fr.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return ret;
   }
 
 }

@@ -1,7 +1,7 @@
 package com.oceanai.cluster.dbscan;
 
 import com.google.gson.Gson;
-import com.oceanai.cluster.Face;
+import com.oceanai.cluster.bean.F;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class DBScan {
 
   public static void main(String[] args) throws IOException {
     DBScan scan = new DBScan(0.4, 4);
-    List<Point> points = scan.read("F:\\lfw.txt");
+    List<Point> points = scan.read("F:\\secretstar.txt");
 
     long start = System.currentTimeMillis();
     List<Cluster> finalCluster = scan.startCluster(points);
@@ -57,7 +57,7 @@ public class DBScan {
     String line;
     Gson gson = new Gson();
     while ((line = br.readLine()) != null) {
-      Face face = gson.fromJson(line, Face.class);
+      F face = gson.fromJson(line, F.class);
       Point p = new Point(face.getFeature(), face.getLabel(), face.getPath());
       points.add(p);
     }
@@ -135,6 +135,8 @@ public class DBScan {
       }
       distance = proAB / (Math.sqrt(mdimA) * Math.sqrt(mdimB));
     }
+    distance = (1 + distance) / 2;
+    distance = 1 - distance;
     return distance;
   }
 

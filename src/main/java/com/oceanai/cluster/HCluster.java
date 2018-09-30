@@ -1,21 +1,15 @@
 package com.oceanai.cluster;
 
-import com.oceanai.model.Feature;
-import com.oceanai.util.FaceTool;
-import com.oceanai.util.ImageUtil;
+import com.oceanai.cluster.bean.Cluster;
+import com.oceanai.cluster.bean.DataPoint;
+import com.oceanai.util.ClusterUtil;
+import com.oceanai.util.DistanceUtil;
+import com.oceanai.util.FileUtil;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * .
@@ -27,9 +21,7 @@ public class HCluster {
 
   public static void main(String[] args) {
     HCluster hc = new HCluster();
-    List<DataPoint> dp = new ArrayList<>();
-
-    dp = hc.readDataMulti("F:\\faces");
+    List<DataPoint> dp = ClusterUtil.extractMulti("F:\\faces", "tcp://192.168.1.6:5559");
 
     /*
      * freq代表了聚类的终止条件，判断还有没有距离小于freq的两个类簇，若有则合并后继续迭代，否则终止迭代
@@ -49,48 +41,19 @@ public class HCluster {
       }
       System.out.println("----");
 
-      // show image
-
-
       // save to disk
       File tmp = new File("F:\\output\\" + cl.getClusterName());
       tmp.mkdir();
       for (DataPoint tempdp : tempDps) {
         try {
-          FileInputStream fis = new FileInputStream(new File(tempdp.getDataPointName()));
-          FileOutputStream fos = new FileOutputStream(
+          FileUtil.copyByChannel(tempdp.getDataPointName(),
               tmp.getPath() + File.separator + UUID.randomUUID().toString() + ".jpg");
-          byte[] bytes = new byte[fis.available()];
-          fis.read(bytes);
-          fos.write(bytes);
-          fos.close();
-          fis.close();
         } catch (IOException e) {
           e.printStackTrace();
         }
       }
     }
 
-  }
-
-  private static List<String> getFiles(String path) {
-    List<String> list = new ArrayList<>();
-    find(path, list);
-    return list;
-  }
-
-  private static void find(String path, List<String> list) {
-    File file = new File(path);
-    if (!file.exists()) {
-      System.err.println("file is not exist");
-    } else if (file.isFile()) {
-      list.add(file.getPath());
-    } else if (file.isDirectory()) {
-      String[] files = file.list();
-      for (String f : files) {
-        find(path + File.separator + f, list);
-      }
-    }
   }
 
   private List<Cluster> startCluster(List<DataPoint> dp, double freq) {
@@ -133,7 +96,7 @@ public class HCluster {
            */
           for (int m = 0; m < dataPointsA.size(); m++) {
             for (int n = 0; n < dataPointsB.size(); n++) {
-              tempDis = tempDis + getDistance(dataPointsA.get(m), dataPointsB.get(n));
+              tempDis = tempDis + DistanceUtil.cosine(dataPointsA.get(m), dataPointsB.get(n));
             }
           }
           tempDis = tempDis / (dataPointsA.size() * dataPointsB.size());
@@ -171,7 +134,7 @@ public class HCluster {
       for (DataPoint dp : dpB) {
         DataPoint tempDp = new DataPoint();
         tempDp.setDataPointName(dp.getDataPointName());
-        tempDp.setDimensioin(dp.getDimensioin());
+        tempDp.setVector(dp.getVector());
         tempDp.setCluster(clusterA);
         dpA.add(tempDp);
       }
@@ -194,110 +157,6 @@ public class HCluster {
       originalClusters.add(tempCluster);
     }
     return originalClusters;
-  }
-
-  private List<DataPoint> readData(String dir) throws IOException {
-    FaceTool faceTool = new FaceTool("tcp://192.168.1.6:5559");
-    List<String> files = getFiles(dir);
-    List<DataPoint> res = new ArrayList<>();
-    for (String file : files) {
-      List<Feature> f = faceTool.extract(ImageUtil.imageToBase64FromFile(file, "jpg"));
-      if (f != null) {
-        res.add(new DataPoint(f.get(0).getFeature(), file));
-      }
-    }
-    faceTool.close();
-    return res;
-  }
-
-  private double getDistance(DataPoint dataPoint, DataPoint dataPoint2) {
-    double distance = 0;
-    double[] dimA = dataPoint.getDimensioin();
-    double[] dimB = dataPoint2.getDimensioin();
-    if (dimA.length == dimB.length) {
-      double mdimA = 0;// dimA的莫
-      double mdimB = 0;// dimB的莫
-      double proAB = 0;// dimA和dimB的向量积
-      for (int i = 0; i < dimA.length; i++) {
-        proAB = proAB + dimA[i] * dimB[i];
-        mdimA = mdimA + dimA[i] * dimA[i];
-        mdimB = mdimB + dimB[i] * dimB[i];
-      }
-      distance = proAB / (Math.sqrt(mdimA) * Math.sqrt(mdimB));
-    }
-    return distance;
-  }
-
-  private List<DataPoint> readDataMulti(String dir) {
-    return readDataMulti(dir, 10);
-  }
-
-  public List<DataPoint> readDataMulti(String dir, int threadNum) {
-    List<String> files = getFiles(dir);
-    List<DataPoint> res = new ArrayList<>();
-    ExecutorService executors = Executors.newFixedThreadPool(threadNum);
-    List<FaceTool> tools = new ArrayList<>();
-    for (int i = 0; i < threadNum + 1; i++) {
-      FaceTool tool = new FaceTool("tcp://192.168.1.6:5559");
-      tools.add(tool);
-    }
-
-    int sections = files.size() / threadNum;
-    CountDownLatch countDownLatch = new CountDownLatch(threadNum + 1);
-    List<Feature> features = new ArrayList<>();
-    List<Future<List<Feature>>> futures = new ArrayList<>();
-    for (int i = 0; i < threadNum + 1; i++) {
-      Future<List<Feature>> future = executors
-          .submit(new ExtractFeature(tools.get(i), files.subList(i * sections,
-              (i + 1) * sections > files.size() ? files.size() : (i + 1) * sections)));
-      futures.add(future);
-      countDownLatch.countDown();
-    }
-    try {
-      countDownLatch.await();
-      for (Future<List<Feature>> future : futures) {
-        features.addAll(future.get());
-      }
-    } catch (InterruptedException | ExecutionException e) {
-      e.printStackTrace();
-    }
-
-    for (Feature feature : features) {
-      DataPoint dp = new DataPoint(feature.getFeature(), feature.getName()); // 文件名作为dp的name
-      res.add(dp);
-    }
-    // close
-    for (FaceTool tool : tools) {
-      tool.close();
-    }
-    executors.shutdown();
-    System.out.println("read data success!");
-    return res;
-  }
-
-
-  private static class ExtractFeature implements Callable<List<Feature>> {
-
-    private FaceTool tool;
-    private List<String> files;
-
-    public ExtractFeature(FaceTool tool, List<String> files) {
-      this.tool = tool;
-      this.files = files;
-    }
-
-    @Override
-    public List<Feature> call() throws Exception {
-      List<Feature> res = new ArrayList<>();
-      for (String file : files) {
-        List<Feature> features = tool.extract(ImageUtil.imageToBase64FromFile(file, "jpg"));
-        if (features != null) {
-          features.get(0).setName(file);
-          res.add(features.get(0));
-        }
-      }
-      return res;
-    }
   }
 
 

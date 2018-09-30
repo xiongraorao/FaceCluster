@@ -2,8 +2,8 @@ package com.oceanai;
 
 import com.oceanai.model.SearchFeature;
 import com.oceanai.util.FaceTool;
+import com.oceanai.util.ImageUtil;
 import com.oceanai.util.LogUtil;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -48,14 +48,15 @@ public class FaceCollect {
           logger.info("start collect face in camera 61");
           for (SearchFeature feature : searchFeatureList) {
             if (feature.quality == 1.0 && feature.score > 0.95) {
-              SearchFeature.Point leftTop = feature.bbox.left_top;
-              BufferedImage sub = bImg61
-                  .getSubimage(leftTop.x, leftTop.y, feature.width, feature.height);
+              BufferedImage sub = ImageUtil
+                  .subImage(bImg61, feature.left, feature.height, feature.width, feature.height);
               String path = outputPath + File.separator + "61" + File.separator + UUID
                   .randomUUID().toString() + ".jpg";
-              ImageIO.write(sub, "jpg", new File(path));
+              if (sub != null) {
+                ImageIO.write(sub, "jpg", new File(path));
+              }
               logger.info("save to " + path + "successfully!");
-            }else {
+            } else {
               logger.info("image quality is poor!");
             }
           }
@@ -64,15 +65,17 @@ public class FaceCollect {
         if (searchFeatureList2.size() != 0) {
           logger.info("start collect face in camera 62");
           for (SearchFeature feature : searchFeatureList2) {
-            SearchFeature.Point leftTop = feature.bbox.left_top;
-            BufferedImage sub = bImg62
-                .getSubimage(leftTop.x, leftTop.y, feature.width, feature.height);
-            String path = outputPath + File.separator + "62" + File.separator + UUID
-                .randomUUID().toString() + ".jpg";
             if (feature.quality == 1.0 && feature.score > 0.95) {
-              ImageIO.write(sub, "jpg", new File(path));
+              BufferedImage sub = ImageUtil
+                  .subImage(bImg62, feature.left, feature.height, feature.width, feature.height);
+              String path = outputPath + File.separator + "62" + File.separator + UUID
+                  .randomUUID().toString() + ".jpg";
+              if (sub != null) {
+                ImageIO.write(sub, "jpg", new File(path));
+              }
+              logger.info("save to " + path + "successfully!");
             }
-            logger.info("save to " + path + "successfully!");
+
           }
         }
       } catch (InterruptedException | IOException e) {

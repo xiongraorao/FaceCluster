@@ -132,4 +132,21 @@ public class ImageUtil {
     g.dispose();
     return dimg;
   }
+
+  public static BufferedImage subImage(BufferedImage image, int left, int top, int width,
+      int height) {
+    int h = image.getHeight();
+    int w = image.getWidth();
+    if (left >= 0 && left <= w && top >= 0 && top <= h && width > 0 && height > 0) {
+      if (left + width > w) {
+        width = w - left;
+      }
+      if (top + height > h) {
+        top = h - height;
+      }
+      return image.getSubimage(left, top, width, height);
+    } else {
+      return null;
+    }
+  }
 }

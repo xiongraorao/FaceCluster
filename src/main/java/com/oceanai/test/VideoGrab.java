@@ -3,6 +3,7 @@ package com.oceanai.test;
 import com.oceanai.GrabThread;
 import com.oceanai.model.SearchFeature;
 import com.oceanai.util.FaceTool;
+import com.oceanai.util.ImageUtil;
 import com.oceanai.util.LogUtil;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -39,13 +40,14 @@ public class VideoGrab {
           logger.info("start collect face in camera 61");
           for (SearchFeature feature : searchFeatureList) {
             if (feature.quality == 1.0) {
-              SearchFeature.Point leftTop = feature.bbox.left_top;
-              BufferedImage sub = bufferedImage
-                  .getSubimage(leftTop.x, leftTop.y, feature.width, feature.height);
+              BufferedImage sub = ImageUtil.subImage(bufferedImage, feature.left,
+                  feature.height, feature.width, feature.height);
               String path = "F:\\secretstar\\" + String.format("%010d", count++) + ".jpg";
-              ImageIO.write(sub, "jpg", new File(path));
+              if (sub != null) {
+                ImageIO.write(sub, "jpg", new File(path));
+              }
               logger.info("save to " + path + "successfully!");
-            }else {
+            } else {
               logger.info("image quality is poor!");
             }
           }

@@ -1,4 +1,4 @@
-package com.oceanai.cluster;
+package com.oceanai.cluster.bean;
 
 import java.util.ArrayList;
 import java.util.List;
