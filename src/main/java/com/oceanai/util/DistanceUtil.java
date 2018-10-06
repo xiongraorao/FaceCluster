@@ -1,6 +1,8 @@
 package com.oceanai.util;
 
+import com.oceanai.cluster.bean.Cluster;
 import com.oceanai.cluster.bean.DataPoint;
+import java.util.List;
 
 /**
  * 距离计算方式.
@@ -81,6 +83,26 @@ public class DistanceUtil {
       distance = (1 + distance) / 2; // 归一化到0-1之间
       return distance;
     }
+  }
+
+  public static double[] clusterDistance(Cluster c1, Cluster c2) {
+    double center;
+    double min = Double.MAX_VALUE;
+    List<DataPoint> dps1 = c1.getDataPoints();
+    List<DataPoint> dps2 = c2.getDataPoints();
+    for (int i = 0; i < dps1.size(); i++) {
+      for (int j = 0; j < dps2.size(); j++) {
+        double dist = DistanceUtil.euclidean(dps1.get(i), dps2.get(j));
+        if (dist < min) {
+          min = dist;
+        }
+      }
+    }
+    center = DistanceUtil.euclidean(c1.getMid(), c2.getMid());
+    double[] ret = new double[2];
+    ret[0] = center;
+    ret[1] = min;
+    return ret;
   }
 
 }
